@@ -5,4 +5,8 @@
     <string name="browse_label">Choose File</string>
     <string name="about_label">About</string>
     <string name="exit_label">Exit</string>
+    <string name="about_text">\
+    	droiDICOM is a DICOM image viewing application for the Android 2.2+ platform.
+    	Put more shit in here as we create the app.
+    	</string>
 </resources>
