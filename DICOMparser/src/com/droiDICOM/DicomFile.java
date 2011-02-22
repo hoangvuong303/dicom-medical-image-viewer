@@ -31,7 +31,13 @@ public class DicomFile {
 
 		parsePreamble();
 		parseMetaInformation();
+		
+		//using a for loop instead of while for debuging purposes...
+		for(int i = 0;parseGroup();i++) {
+			//System.out.println(i);
+		}
 	}
+	
 	
 	/*
 	 * Parses the file preamble, throws DataFormatException in case of a error
@@ -76,9 +82,10 @@ public class DicomFile {
 		//Once the meta information is parsed this value will change
 		mTransferSyntax = TransferSyntax.EXPLICIT_LITTLE_ENDIAN; 
 		order = ByteOrder.LITTLE_ENDIAN;
-		parseGroup();
+		if(!parseGroup())
+			throw new DataFormatException("Could not parse meta information");
 		
-		UI ui = (UI)elements.get(0x0010);
+		UI ui = (UI)elements.get(genKey(2,16));
 		if(ui.getValue().equals("1.2.840.10008.1.2"))
 			mTransferSyntax = TransferSyntax.IMPLICIT_LITTLE_ENDIAN;
 		else if(ui.getValue().equals("1.2.840.10008.1.2.1"))
@@ -93,14 +100,15 @@ public class DicomFile {
 	 * @Returns the parsed group in a Group object.
 	 * @Throws DataFormatException if the group being parsed is not encoded properly
 	 */
-	private void parseGroup() throws DataFormatException {
+	private boolean parseGroup() throws DataFormatException {
 		bytesLeftToParse = 0;
 		try {
 			if(mTransferSyntax == TransferSyntax.EXPLICIT_LITTLE_ENDIAN)
-				parseExplicit();
+				return parseExplicit();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return false; //this needs to change
 	}
 	
 	/*
@@ -108,7 +116,7 @@ public class DicomFile {
 	 * @Returns the parsed group in a Group object.
 	 * @Throws DataFormatException if the group being parsed is not encoded properly
 	 */
-	private void parseExplicit() throws DataFormatException, IOException {
+	private boolean parseExplicit() throws DataFormatException, IOException {
 		AT tag;
 		byte[] group = new byte[2];
 		byte[] element = new byte[2];
@@ -117,9 +125,13 @@ public class DicomFile {
 		char vr2 = 0;
 		byte[] bytes;
 		VR vr = null;
+		
+		int isEnd = 0;
 
 		try {
-			mFile.read(group); //-2 form bytesLeftToParse
+			isEnd  = mFile.read(group); //-2 form bytesLeftToParse
+			if(isEnd == -1)
+				return false;
 			mFile.read(element); //-2 form bytesLeftToParse
 			vr1 = (char)mFile.readByte(); //-1 for bytesLeftToParse
 			vr2 = (char)mFile.readByte(); //-1 for bytesLeftToParse
@@ -216,13 +228,15 @@ public class DicomFile {
 		else {
 			//change this crap
 			if(bytesLeftToParse > 0) 
-				parseExplicit();
+				return true & parseExplicit();
 			//vr = new VRbinary(bytes, bytes.length, order); // <<<<< WONT WORK!
 		}
 		
 		elements.put(tag.getCompoundedKey(), vr);
 		if(bytesLeftToParse > 0) 
-			parseExplicit();
+			return true & parseExplicit();
+		else
+			return true;
 	}
 	
 	/*
@@ -251,4 +265,12 @@ public class DicomFile {
 		else //EXPLICIT_BIG_ENDIAN
 			return x;
 	}
+	
+	private long genKey(int group,int element) {
+		long size = 0;
+		size += 0xFFFF & group;
+		size += (0xFFFF & element) << 16;
+		return size;
+	}
+	
 }
