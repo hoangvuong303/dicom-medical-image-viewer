@@ -11,7 +11,7 @@ public class UL extends VRbinary {
 		value = buffer.getLong();
 	}
 
-	public long getValue() {
+	public Long getValue() {
 		return value;
 	}
 }

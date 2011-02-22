@@ -11,7 +11,7 @@ public class SS extends VRbinary {
 		value = buffer.getShort();
 	}
 
-	public short getValue() {
+	public Short getValue() {
 		return value;
 	}
 }

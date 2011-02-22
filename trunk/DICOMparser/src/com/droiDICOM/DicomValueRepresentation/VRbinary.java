@@ -3,7 +3,7 @@ package com.droiDICOM.DicomValueRepresentation;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class VRbinary implements VR {
+public abstract class VRbinary implements VR {
 	protected ByteBuffer buffer;
 	private static final String bigEndian = ByteOrder.BIG_ENDIAN.toString();
 	
@@ -25,5 +25,11 @@ public class VRbinary implements VR {
 		buffer.position(0);
 		buffer.order(order);
 	}
+	
+	public String toString() {
+		return "" + getValue();
+	}
+	
+    abstract Object getValue();
 }
 

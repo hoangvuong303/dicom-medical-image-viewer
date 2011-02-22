@@ -11,7 +11,7 @@ public class SL extends VRbinary {
 		value = buffer.getInt();
 	}
 
-	public int getValue() {
+	public Integer getValue() {
 		return value;
 	}
 }

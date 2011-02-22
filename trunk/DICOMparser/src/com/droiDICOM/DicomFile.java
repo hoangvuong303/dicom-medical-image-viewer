@@ -86,7 +86,13 @@ public class DicomFile {
 		Group f = parseGroup();
 		///f.displayElements();
 		Group z = parseGroup();
-		z.displayElements();
+		//z.displayElements();
+		Group k = parseGroup();
+		Group k1 = parseGroup();
+		Group k2 = parseGroup();
+		Group k3 = parseGroup();
+		System.out.println("Group ID:" + k3.getGroupID());
+		k3.displayElements();		
 	}
 	
 	
@@ -122,7 +128,7 @@ public class DicomFile {
 		char vr1 = 0;
 		char vr2 = 0;
 		byte[] bytes;
-		VR vr;
+		VR vr = null;
 
 		try {
 			mFile.read(group); //-2 form bytesLeftToParse
@@ -221,10 +227,13 @@ public class DicomFile {
 		else if(VRtype.equals("UT"))
 			vr = new UT(bytes);
 		else {
-			vr = new VRbinary(bytes, bytes.length, order); // <<<<< WONT WORK!
+			//change this crap
+			if(bytesLeftToParse > 0) 
+				parseExplicit(g);
+			//vr = new VRbinary(bytes, bytes.length, order); // <<<<< WONT WORK!
 		}
 		
-		System.out.println("Bytes left: " + bytesLeftToParse);
+		//System.out.println("Bytes left: " + bytesLeftToParse);
 		g.addElement(tag.getElement(), vr);
 		if(bytesLeftToParse > 0) 
 			parseExplicit(g);

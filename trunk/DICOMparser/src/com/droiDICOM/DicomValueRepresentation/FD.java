@@ -11,7 +11,7 @@ public class FD extends VRbinary {
 		value = buffer.getDouble();
 	}
 
-	public double getValue() {
+	public Double getValue() {
 		return value;
 	}
 }
