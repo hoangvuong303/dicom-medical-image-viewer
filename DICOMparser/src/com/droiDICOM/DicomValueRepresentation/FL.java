@@ -11,7 +11,7 @@ public class FL extends VRbinary {
 		value = buffer.getFloat();
 	}
 
-	public float getValue() {
+	public Float getValue() {
 		return value;
 	}
 }

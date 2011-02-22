@@ -18,7 +18,7 @@ class Group {
 	}
 	
 	public void addElement(int elemNumb,VR value) {
-		System.out.println("ENTERING: " + elemNumb);
+		//System.out.println("ENTERING: " + elemNumb);
 		elements.put(elemNumb, value);
 		VR v = elements.get(elemNumb);
 	}

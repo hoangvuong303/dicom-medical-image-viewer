@@ -18,4 +18,8 @@ public class AT implements VR{
 	public int getElement() {
 		return element.getValue();
 	}
+	
+	public String toString() {
+		return "("+getGroup() + ", " + getElement() + ")";
+	}
 }
