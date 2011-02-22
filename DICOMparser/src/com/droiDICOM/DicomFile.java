@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteOrder;
+import java.util.HashMap;
 import java.util.zip.DataFormatException;
 
 import com.droiDICOM.DicomValueRepresentation.*;
@@ -17,6 +18,8 @@ public class DicomFile {
 	private TransferSyntax mTransferSyntax;
 	private long bytesLeftToParse;
 	private ByteOrder order;
+	HashMap<Long,VR> elements;
+	private final int MAP_CAPACITY = 75;
 	
 	/*
 	 * A constructor which when given a filename constructs a DicomFile object. The constructor calls 
@@ -24,6 +27,8 @@ public class DicomFile {
 	 */
 	public DicomFile(String filename) throws DataFormatException, FileNotFoundException {
 		mFile = new DataInputStream(new FileInputStream(filename));
+		elements = new HashMap<Long,VR>(MAP_CAPACITY);
+
 		parsePreamble();
 		parseMetaInformation();
 	}
@@ -71,28 +76,15 @@ public class DicomFile {
 		//Once the meta information is parsed this value will change
 		mTransferSyntax = TransferSyntax.EXPLICIT_LITTLE_ENDIAN; 
 		order = ByteOrder.LITTLE_ENDIAN;
-		Group g = parseGroup();
+		parseGroup();
 		
-		UI ui = (UI)g.getElement(0x0010);
+		UI ui = (UI)elements.get(0x0010);
 		if(ui.getValue().equals("1.2.840.10008.1.2"))
 			mTransferSyntax = TransferSyntax.IMPLICIT_LITTLE_ENDIAN;
 		else if(ui.getValue().equals("1.2.840.10008.1.2.1"))
 			mTransferSyntax = TransferSyntax.EXPLICIT_LITTLE_ENDIAN;
 		else if(ui.getValue().equals("1.2.840.10008.1.2.2"))
 			mTransferSyntax = TransferSyntax.EXPLICIT_BIG_ENDIAN;
-		
-		System.out.println("Have meta information");
-		
-		Group f = parseGroup();
-		///f.displayElements();
-		Group z = parseGroup();
-		//z.displayElements();
-		Group k = parseGroup();
-		Group k1 = parseGroup();
-		Group k2 = parseGroup();
-		Group k3 = parseGroup();
-		System.out.println("Group ID:" + k3.getGroupID());
-		k3.displayElements();		
 	}
 	
 	
@@ -101,18 +93,14 @@ public class DicomFile {
 	 * @Returns the parsed group in a Group object.
 	 * @Throws DataFormatException if the group being parsed is not encoded properly
 	 */
-	private Group parseGroup() throws DataFormatException {
-		Group g = new Group();
-		
+	private void parseGroup() throws DataFormatException {
 		bytesLeftToParse = 0;
 		try {
 			if(mTransferSyntax == TransferSyntax.EXPLICIT_LITTLE_ENDIAN)
-				parseExplicit(g);
+				parseExplicit();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-				
-		return g;
 	}
 	
 	/*
@@ -120,7 +108,7 @@ public class DicomFile {
 	 * @Returns the parsed group in a Group object.
 	 * @Throws DataFormatException if the group being parsed is not encoded properly
 	 */
-	private void parseExplicit(Group g) throws DataFormatException, IOException {
+	private void parseExplicit() throws DataFormatException, IOException {
 		AT tag;
 		byte[] group = new byte[2];
 		byte[] element = new byte[2];
@@ -174,7 +162,6 @@ public class DicomFile {
 			size += (0xFF & bytes[3]) << 24;
 
 			bytesLeftToParse = size;
-			g.setGroupID(tag.getGroup());
 		}
 	
 		//create VR representing data
@@ -229,14 +216,13 @@ public class DicomFile {
 		else {
 			//change this crap
 			if(bytesLeftToParse > 0) 
-				parseExplicit(g);
+				parseExplicit();
 			//vr = new VRbinary(bytes, bytes.length, order); // <<<<< WONT WORK!
 		}
 		
-		//System.out.println("Bytes left: " + bytesLeftToParse);
-		g.addElement(tag.getElement(), vr);
+		elements.put(tag.getCompoundedKey(), vr);
 		if(bytesLeftToParse > 0) 
-			parseExplicit(g);
+			parseExplicit();
 	}
 	
 	/*

@@ -22,4 +22,11 @@ public class AT implements VR{
 	public String toString() {
 		return "("+getGroup() + ", " + getElement() + ")";
 	}
+	
+	public long getCompoundedKey() {
+		long size = 0;
+		size += 0xFFFF & group.getValue();
+		size += (0xFFFF & element.getValue()) << 16;
+		return size;
+	}
 }
