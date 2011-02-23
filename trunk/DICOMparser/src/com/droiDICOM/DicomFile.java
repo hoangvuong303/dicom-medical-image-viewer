@@ -37,7 +37,10 @@ public class DicomFile {
 			//System.out.println(i);
 		}
 	}
-	
+
+	private void parseImage() {
+		
+	}
 	
 	/*
 	 * Parses the file preamble, throws DataFormatException in case of a error
