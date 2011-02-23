@@ -26,10 +26,14 @@ public abstract class VRbinary implements VR {
 		buffer.order(order);
 	}
 	
+	public VRbinary() {
+		
+	}
+	
 	public String toString() {
 		return "" + getValue();
 	}
 	
-    abstract Object getValue();
+    abstract public Object getValue();
 }
 
